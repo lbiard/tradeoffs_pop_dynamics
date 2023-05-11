@@ -71,14 +71,14 @@ Can be used for the simulation with decreased density dependence.
 
 4. `appendix E` folder: 
 This folder contains the R script to reproduce the simulations and figures present in the appendix E.
-- `a4_sa_f.r`
-Can be used for the simulation of Appendix 4 with a tradeoff between adult survival and fecundity.
-- `a4_sj_f.r`
-Can be used for the simulation of Appendix 4 with a tradeoff between juvenile survival and fecundity.
-- `a4_sa_sj.r`
-Can be used for the simulation of Appendix 4 with an intergenerational tradeoff between parental adult survival and offspring juvenile survival.
-- `a4_f_sj.r`
-Can be used for the simulation of Appendix 4 with an intergenerational tradeoff between parental fecundity and offspring juvenile survival.
+- `a5_sa_f.r`
+Can be used for the simulation of Appendix E with a tradeoff between adult survival and fecundity.
+- `a5_sj_f.r`
+Can be used for the simulation of Appendix E with a tradeoff between juvenile survival and fecundity.
+- `a5_sa_sj.r`
+Can be used for the simulation of Appendix E with an intergenerational tradeoff between parental adult survival and offspring juvenile survival.
+- `a5_f_sj.r`
+Can be used for the simulation of Appendix E with an intergenerational tradeoff between parental fecundity and offspring juvenile survival.
 
 5. `methods animation` folder: 
 - `method_main.gif`
