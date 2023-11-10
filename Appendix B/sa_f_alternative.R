@@ -561,15 +561,21 @@ bayes.c.eff.lower <- apply(int.sim, 2, function(x) quantile(x, probs = c(0.025))
 bayes.c.eff.upper <- apply(int.sim, 2, function(x) quantile(x, probs = c(0.975)))
 plot.dat <- data.frame(x2.sim, bayes.c.eff.mean, bayes.c.eff.lower, bayes.c.eff.upper)
 
+library(grid)
+text_fast <- textGrob("Fast", gp=gpar(fontsize=13, fontface="bold"))
+text_slow <- textGrob("Slow", gp=gpar(fontsize=13, fontface="bold"))
 
 p <- ggplot(trial_plot, aes(x = (x2.sim), y = bayes.c.eff.mean))+
   geom_hline(yintercept=0, linetype=2)+
-  coord_cartesian(ylim = c(-50,75))+
-  ggtitle(element_blank())+
+  coord_cartesian(ylim = c(-50,75), clip = "off")+
+  ggtitle("Adult survival - Fecundity")+
   xlab(element_blank())+
   ylab(element_blank())+
   theme_bw() +
   theme(legend.position = "none")+
+  annotation_custom(text_fast,xmin=0.3,xmax=0.3,ymin=-65,ymax=-65) + 
+  annotation_custom(text_slow,xmin=2.5,xmax=2.5,ymin=-65,ymax=-65) +
+  theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16))
@@ -580,180 +586,3 @@ p <- p + geom_point(data = trial_plot, aes(x=log(gentime), y=V1), size=1.5)
 p
 
 
-
-#################################################
-#################################################
-#### Figures autocorrelation population size ####
-#################################################
-#################################################
-
-## Increase in context dependence of the TO ##
-
-trial_plot <- as.data.frame(cbind(apply(change_autocorrelation_1, 2, function(x) mean(x, na.rm=T)),
-                                  apply(change_autocorrelation_1, 2, function(x) quantile(x, probs = c(0.025), na.rm=T)),
-                                  apply(change_autocorrelation_1, 2, function(x) quantile(x, probs = c(0.975), na.rm=T)),
-                                  gentime))
-
-point_plot <- t(change_autocorrelation_1)
-point_plot <- c(point_plot)
-point_plot <- as.data.frame(cbind(point_plot,  rep(gentime, replicat), rep((1:125), replicat)))
-
-
-
-fit <- brm(point_plot ~ log(V2) + (1|V3), data = point_plot, 
-           cores=2, chains=2, iter = 6000, warmup = 3000)
-summary(fit)
-
-posterior <- as.matrix(fit)
-dat_plot <- as.data.frame(posterior)
-
-
-x2.sim <- seq(min(log(gentime)), max(log(gentime)), by = 0.005)
-
-int.sim <- matrix(rep(NA, nrow(dat_plot)*length(x2.sim)), nrow = nrow(dat_plot))
-for(i in 1:length(x2.sim)){
-  int.sim[, i] <- dat_plot$b_Intercept + dat_plot$b_logV2 * (x2.sim[i])
-}
-
-bayes.c.eff.mean <- apply(int.sim, 2, mean)
-bayes.c.eff.lower <- apply(int.sim, 2, function(x) quantile(x, probs = c(0.025)))
-bayes.c.eff.upper <- apply(int.sim, 2, function(x) quantile(x, probs = c(0.975)))
-plot.dat <- data.frame(x2.sim, bayes.c.eff.mean, bayes.c.eff.lower, bayes.c.eff.upper)
-
-
-p <- ggplot(trial_plot, aes(x = (x2.sim), y = bayes.c.eff.mean))+
-  geom_hline(yintercept=0, linetype=2)+
-  coord_cartesian(ylim = c(-0.3,0.3))+
-  ggtitle(element_blank())+
-  xlab(element_blank())+
-  ylab(element_blank())+
-  theme_bw() +
-  theme(legend.position = "none")+
-  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.text=element_text(size=14),
-        axis.title=element_text(size=16))
-p <- p + geom_point(data = point_plot, aes(y=point_plot, x=log(V2)), position = position_jitter(w = 0.1, h = 0),alpha=0.02, size=1)
-p <- p + geom_line(data=plot.dat,aes(x = (x2.sim), y = bayes.c.eff.mean),color = "black", alpha = 0.8, size = 1.2)+
-  geom_ribbon(data=plot.dat,aes(ymin = bayes.c.eff.lower, ymax = bayes.c.eff.upper), fill = "black", alpha = 0.2)
-p <- p + geom_point(data = trial_plot, aes(x=log(gentime), y=V1), size=1.5)
-p
-
-
-################################################################
-################################################################
-#### Change in generation time vs. change in CV growth rate ####
-################################################################
-################################################################
-
-# Average value of change in CV growth rate across the 50 replicates
-average_change_coef_var_1 <- apply(change_coef_var_1, 2, function(x) mean(x, na.rm=T))
-# Average value of change in realized generation time across the 50 replicates
-average_change_gen_time_1 <- apply(change_gen_time_1, 2, function(x) mean(x, na.rm=T))
-
-data_average_change <- as.data.frame(cbind(average_change_coef_var_1,
-                                           average_change_gen_time_1,
-                                           gentime))
-
-p <- ggplot(data_average_change, aes(x=average_change_gen_time_1, y=average_change_coef_var_1, color=gentime))+
-  geom_point()+
-  ggtitle(element_blank())+
-  xlab(element_blank())+
-  ylab(element_blank())+
-  theme_bw() +
-  theme(legend.position = "none")+
-  #theme(legend.position = c(0.8, 0.7))+
-  #labs(color = "Baseline generation time")+
-  scale_colour_gradient(high = "yellow2", low = "purple")+
-  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.text=element_text(size=14),
-        axis.title=element_text(size=16))
-
-
-legend <- cowplot::get_legend(p)
-
-
-
-############################################################################
-############################################################################
-#### Average vital rates (individual quality) at the end of simulations ####
-############################################################################
-############################################################################
-
-# keep only last 10 time steps, and keep the average across replicates
-scen_2_sj <- apply(store_x[90:100,,2,,1], c(3), function(x)  mean(x, na.rm = T))
-scen_1_sj <- apply(store_x[90:100,,1,,1], c(3), function(x)  mean(x, na.rm = T))
-
-scen_2_ta <- apply(store_x[90:100,,2,,2], c(3), function(x)  mean(x, na.rm = T))
-scen_1_ta <- apply(store_x[90:100,,1,,2], c(3), function(x)  mean(x, na.rm = T))
-
-scen_2_sa <- apply(store_x[90:100,,2,,3], c(3), function(x)  mean(x, na.rm = T))
-scen_1_sa <- apply(store_x[90:100,,1,,3], c(3), function(x)  mean(x, na.rm = T))
-
-scen_2_f <- apply(store_x[90:100,,2,,4], c(3), function(x)  mean(x, na.rm = T))
-scen_1_f <- apply(store_x[90:100,,1,,4], c(3), function(x)  mean(x, na.rm = T))
-
-
-data_vr <- as.data.frame(cbind(scen_1_sj, scen_1_ta, scen_1_sa, scen_1_f,
-                               scen_2_sj, scen_2_ta, scen_2_sa, scen_2_f,
-                               gentime))
-
-
-sa1 <- ggplot(data_vr, aes(x=log(gentime), y=scen_2_sa))+
-  geom_hline(yintercept=0, linetype=2)+
-  geom_point(color="#46ACC8", alpha=0.6)+
-  ggtitle(element_blank())+
-  coord_cartesian(ylim = c(-1.2,1.2))+
-  xlab(element_blank())+
-  ylab("Adult survival")+
-  theme_bw() +
-  theme(legend.position = "none")+
-  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=12))
-sa1 <- sa1 + geom_point(data = data_vr, aes(x=log(gentime), y=scen_1_sa), color="#B40F20", alpha=0.4)
-sa1
-
-sj1 <- ggplot(data_vr, aes(x=log(gentime), y=scen_2_sj))+
-  geom_hline(yintercept=0, linetype=2)+
-  geom_point(color="#46ACC8", alpha=0.6)+
-  ggtitle("A")+
-  coord_cartesian(ylim = c(-1.2,1.2))+
-  xlab(element_blank())+
-  ylab("Juvenile survival")+
-  theme_bw() +
-  theme(legend.position = "none")+
-  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=12))
-sj1 <- sj1 + geom_point(data = data_vr, aes(x=log(gentime), y=scen_1_sj), color="#B40F20", alpha=0.4)
-sj1
-
-ta1 <- ggplot(data_vr, aes(x=log(gentime), y=scen_2_ta))+
-  geom_hline(yintercept=0, linetype=2)+
-  geom_point(color="#46ACC8", alpha=0.6)+
-  ggtitle(element_blank())+
-  coord_cartesian(ylim = c(-1.2,1.2))+
-  xlab(element_blank())+
-  ylab("Maturation")+
-  theme_bw() +
-  theme(legend.position = "none")+
-  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=12))
-ta1 <- ta1 + geom_point(data = data_vr, aes(x=log(gentime), y=scen_1_ta), color="#B40F20", alpha=0.4)
-ta1
-
-f1 <- ggplot(data_vr, aes(x=log(gentime), y=scen_2_f))+
-  geom_hline(yintercept=0, linetype=2)+
-  geom_point(color="#46ACC8", alpha=0.6)+
-  ggtitle(element_blank())+
-  coord_cartesian(ylim = c(-1.2,1.2))+
-  xlab(element_blank())+
-  ylab("Fecundity")+
-  theme_bw() +
-  theme(legend.position = "none")+
-  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=12))
-f1 <- f1 + geom_point(data = data_vr, aes(x=log(gentime), y=scen_1_f), color="#B40F20", alpha=0.4)
-f1
