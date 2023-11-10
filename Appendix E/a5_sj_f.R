@@ -569,14 +569,21 @@ plot.dat <- data.frame(x2.sim, bayes.c.eff.mean, bayes.c.eff.lower, bayes.c.eff.
 
 ## Figure
 
+library(grid)
+text_fast <- textGrob("Fast", gp=gpar(fontsize=13, fontface="bold"))
+text_slow <- textGrob("Slow", gp=gpar(fontsize=13, fontface="bold"))
+
 q <- ggplot(trial_plot, aes(x = (x2.sim), y = bayes.c.eff.mean))+
   geom_hline(yintercept=0, linetype=2)+
-  coord_cartesian(ylim = c(-20,20))+
-  ggtitle(element_blank())+
+  coord_cartesian(ylim = c(-50,75), clip = "off")+
+  ggtitle("Juvenile survival - Fecundity")+
   xlab(element_blank())+
   ylab(element_blank())+
   theme_bw() +
   theme(legend.position = "none")+
+  annotation_custom(text_fast,xmin=0.3,xmax=0.3,ymin=-65,ymax=-65) + 
+  annotation_custom(text_slow,xmin=2.5,xmax=2.5,ymin=-65,ymax=-65) +
+  theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16))

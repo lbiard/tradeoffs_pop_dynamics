@@ -140,10 +140,10 @@ set_cor_intergen <- function(new_inds, climate, t, scenario) {
   correlation_value <- NULL
   
   #scenario 1
-  correlation_value[1] <- env - 1
+  correlation_value[1] <- (env - 1)*0.9
   
   #scenario 2
-  correlation_value[2] <- -0.37
+  correlation_value[2] <- -0.33
   
   # make correlation matrix
   C <- matrix(correlation_value[scenario], nrow = 2, ncol = 2)
@@ -563,14 +563,21 @@ plot.dat <- data.frame(x2.sim, bayes.c.eff.mean, bayes.c.eff.lower, bayes.c.eff.
 
 ## Figure
 
+library(grid)
+text_fast <- textGrob("Fast", gp=gpar(fontsize=13, fontface="bold"))
+text_slow <- textGrob("Slow", gp=gpar(fontsize=13, fontface="bold"))
+
 s <- ggplot(trial_plot, aes(x = (x2.sim), y = bayes.c.eff.mean))+
   geom_hline(yintercept=0, linetype=2)+
-  coord_cartesian(ylim = c(-40,20))+
-  ggtitle(element_blank())+
+  coord_cartesian(ylim = c(-50,75), clip = "off")+
+  ggtitle("Parental fecundity - Offspring juvenile survival")+
   xlab(element_blank())+
   ylab(element_blank())+
   theme_bw() +
   theme(legend.position = "none")+
+  annotation_custom(text_fast,xmin=0.3,xmax=0.3,ymin=-65,ymax=-65) + 
+  annotation_custom(text_slow,xmin=2.5,xmax=2.5,ymin=-65,ymax=-65) +
+  theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16))
