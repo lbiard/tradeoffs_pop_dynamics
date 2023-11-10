@@ -140,7 +140,7 @@ set_cor_intergen <- function(new_inds, climate, t, scenario) {
   correlation_value <- NULL
   
   #scenario 2
-  correlation_value[2] <- env - 1
+  correlation_value[2] <- (env - 1)*0.9
   
   #scenario 1
   correlation_value[1] <- -0.9
@@ -367,11 +367,17 @@ replicat <- 50 # number of simulation replications per life history
 
 
 # 4D array to store abundance at each time step, for each simulation replicate, for each scenario, for each life history
-ind_abund <- array(data = NA, dim = c(time_steps+1, replicat, 3, dim(lhs)[1]))
+ind_abund <- array(data = NA, dim = c(time_steps+1, replicat, 2, dim(lhs)[1]))
 # 5D array to store vital rates at each time step, for each simulation replicate, for each scenario, for each life history
-store_x <- array(data = NA, dim = c(time_steps, replicat, 3, dim(lhs)[1], 4))
+store_x <- array(data = NA, dim = c(time_steps, replicat, 2, dim(lhs)[1], 4))
 # 3D array to store realized generation time for each simulation replicate, for each scenario, for each life history
-gen_time <- array(data = NA, dim = c(replicat, 3, dim(lhs)[1]))
+gen_time <- array(data = NA, dim = c(replicat, 2, dim(lhs)[1]))
+# 3D array to store age at first reproduction for each simulation replicate, for each scenario, for each life history
+age_first_repro_saved <- array(data = NA, dim = c(replicat, 2, dim(lhs)[1]))
+# 3D array to store adult survival for each simulation replicate, for each scenario, for each life history
+adult_survival_saved <- array(data = NA, dim = c(replicat, 2, dim(lhs)[1]))
+# 3D array to store growth rate for each simulation replicate, for each scenario, for each life history
+growth_rate_saved <- array(data = NA, dim = c(replicat, 2, dim(lhs)[1]))
 
 
 for (lh in 1:dim(lhs)[1]) {        ## loop over life histories
@@ -471,16 +477,25 @@ for (lh in 1:dim(lhs)[1]) {        ## loop over life histories
                                                                    (inds_hist$survival==1 & inds_hist$stage==1 & inds_hist$maturation==1 & inds_hist$age>0 & inds_hist$productivity!=0))])$id)],
                                      year>50)$age)
       
+      age_first_repro_saved[i, scenario, lh] <- age_first_repro
+      
       # adult survival
       adult_survival <- length(inds_hist[inds_hist$age>0 & inds_hist$stage==2 & inds_hist$survival==1 & inds_hist$year>50]$survival) / 
         length(inds_hist[inds_hist$age>0 & inds_hist$stage==2 & inds_hist$year>50]$survival)
       
-      # Realized generation time
-      gen_time[i, scenario, lh] <- age_first_repro + (adult_survival / (geometric.mean((ind_abund[52:(time_steps+1),i,scenario,lh]/ind_abund[51:time_steps,i,scenario,lh]))
-                                                                        - adult_survival))
+      adult_survival_saved[i, scenario, lh] <- adult_survival
       
+      # growth rate
+      growth_rate_saved[i, scenario, lh] <- geometric.mean((ind_abund[52:(time_steps+1),i,scenario,lh]/ind_abund[51:time_steps,i,scenario,lh]))
+      
+      # Realized generation time (set to NA if population goes extinct)
+      if(growth_rate_saved[i, scenario, lh] == 0 | is.na(growth_rate_saved[i, scenario, lh])){
+        gen_time[i, scenario, lh] <- NA
+      } else {
+        gen_time[i, scenario, lh] <- age_first_repro + (adult_survival / (geometric.mean((ind_abund[52:(time_steps+1),i,scenario,lh]/ind_abund[51:time_steps,i,scenario,lh]))
+                                                                          - adult_survival))
+      } 
     }
-    
   }
   print(lh) # to have a "progress bar" during the simulation
 }
@@ -577,15 +592,21 @@ bayes.c.eff.lower <- apply(int.sim, 2, function(x) quantile(x, probs = c(0.025))
 bayes.c.eff.upper <- apply(int.sim, 2, function(x) quantile(x, probs = c(0.975)))
 plot.dat <- data.frame(x2.sim, bayes.c.eff.mean, bayes.c.eff.lower, bayes.c.eff.upper)
 
+library(grid)
+text_fast <- textGrob("Fast", gp=gpar(fontsize=13, fontface="bold"))
+text_slow <- textGrob("Slow", gp=gpar(fontsize=13, fontface="bold"))
 
 p4 <- ggplot(trial_plot, aes(x = (x2.sim), y = bayes.c.eff.mean))+
   geom_hline(yintercept=0, linetype=2)+
-  coord_cartesian(ylim = c(-50,75))+
-  ggtitle(element_blank())+
+  coord_cartesian(ylim = c(-50,75), clip = "off")+
+  ggtitle("Parental fecundity - Offspring juvenile survival")+
   xlab(element_blank())+
   ylab(element_blank())+
   theme_bw() +
   theme(legend.position = "none")+
+  annotation_custom(text_fast,xmin=0.3,xmax=0.3,ymin=-65,ymax=-65) + 
+  annotation_custom(text_slow,xmin=2.5,xmax=2.5,ymin=-65,ymax=-65) +
+  theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16))
@@ -638,15 +659,21 @@ bayes.c.eff.lower <- apply(int.sim, 2, function(x) quantile(x, probs = c(0.025))
 bayes.c.eff.upper <- apply(int.sim, 2, function(x) quantile(x, probs = c(0.975)))
 plot.dat <- data.frame(x2.sim, bayes.c.eff.mean, bayes.c.eff.lower, bayes.c.eff.upper)
 
+library(grid)
+text_fast <- textGrob("Fast", gp=gpar(fontsize=13, fontface="bold"))
+text_slow <- textGrob("Slow", gp=gpar(fontsize=13, fontface="bold"))
 
 p4 <- ggplot(trial_plot, aes(x = (x2.sim), y = bayes.c.eff.mean))+
   geom_hline(yintercept=0, linetype=2)+
-  coord_cartesian(ylim = c(-0.3,0.3))+
-  ggtitle(element_blank())+
+  coord_cartesian(ylim = c(-0.3,0.3), clip = "off")+
+  ggtitle("Parental fecundity - Offspring juvenile survival")+
   xlab(element_blank())+
   ylab(element_blank())+
   theme_bw() +
   theme(legend.position = "none")+
+  annotation_custom(text_fast,xmin=0.3,xmax=0.3,ymin=-0.36,ymax=-0.36) + 
+  annotation_custom(text_slow,xmin=2.5,xmax=2.5,ymin=-0.36,ymax=-0.36) +
+  theme(plot.title = element_text(hjust = 0.5))+
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
   theme(axis.text=element_text(size=14),
         axis.title=element_text(size=16))
@@ -674,17 +701,18 @@ data_average_change <- as.data.frame(cbind(average_change_coef_var_1,
 
 s <- ggplot(data_average_change, aes(x=average_change_gen_time_1, y=average_change_coef_var_1, color=gentime))+
   geom_point()+
-  ggtitle(element_blank())+
+  ggtitle("Parental fecundity - Offspring juvenile survival")+
   xlab(element_blank())+
   ylab(element_blank())+
   theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5))+
   #theme(legend.position = "none")+
   #theme(legend.position = c(0.8, 0.7))+
   labs(color = "Baseline generation time")+
   scale_colour_gradient(high = "yellow2", low = "purple")+
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
   theme(axis.text=element_text(size=14),
-        axis.title=element_text(size=16))
+        axis.title=element_text(size=15))
 
 ############################################################################
 ############################################################################
