@@ -753,7 +753,7 @@ sa2
 sj2 <- ggplot(data_vr, aes(x=log(gentime), y=scen_2_sj))+
   geom_hline(yintercept=0, linetype=2)+
   geom_point(color="#46ACC8", alpha=0.7)+
-  ggtitle("B")+
+  labs(title="Juvenile survival \nFecundity")+
   coord_cartesian(ylim = c(-1.2,1.2))+
   xlab(element_blank())+
   ylab(element_blank())+
@@ -761,7 +761,8 @@ sj2 <- ggplot(data_vr, aes(x=log(gentime), y=scen_2_sj))+
   theme(legend.position = "none")+
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())+
   theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=12))
+        axis.title=element_text(size=12),
+        plot.title = element_text(size = 10, hjust = 0.5))
 sj2 <- sj2 + geom_point(data = data_vr, aes(x=log(gentime), y=scen_1_sj), color="#B40F20", alpha=0.5)
 sj2
 
