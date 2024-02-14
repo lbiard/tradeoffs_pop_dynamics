@@ -1,6 +1,6 @@
 # tradeoff_pop_dynamics
 
-This repository hosts the R scripts to reproduce results and figures from the article *Population dynamic consequences of context-dependent tradeoffs across life histories*
+This repository hosts the R scripts to reproduce results and figures from the article *Population dynamic consequences of context-dependent tradeoffs across life histories*. The American Naturalist
 
 By: Louis Bliard, Maria Paniw, Dylan Z. Childs, Arpat Ozgul 
 
