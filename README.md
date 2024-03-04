@@ -1,6 +1,6 @@
 # tradeoff_pop_dynamics
 
-This repository hosts the R scripts to reproduce results and figures from the article *Population dynamic consequences of context-dependent tradeoffs across life histories*. The American Naturalist
+This repository hosts the R scripts to reproduce results and figures from the article *Population dynamic consequences of context-dependent tradeoffs across life histories*. The American Naturalist. https://doi.org/10.1086/730111 
 
 By: Louis Bliard, Maria Paniw, Dylan Z. Childs, Arpat Ozgul 
 
@@ -35,13 +35,13 @@ Please contact louis.bliard@evobio.eu if you have any questions, comments, or co
 
 1. Licenses/restrictions placed on the data: CC0
 
-2. Links to publications that cite or use the data:
+2. Links to publications that cite or use the data: https://doi.org/10.1086/730111
 
-3. Links to other publicly accessible locations of the data:
+3. Links to other publicly accessible locations of the data: https://doi.org/10.5281/zenodo.10656685 
 
 4. Was data derived from another source? No
 
-5. Recommended citation for this dataset: Bliard Louis, Paniw Maria, Childs Dylan, Ozgul Arpat. (2024). Simulation code from "Population dynamic consequences of context-dependent tradeoffs across life histories". [Data set]. Zenodo.
+5. Recommended citation for this dataset: Bliard, L., Paniw, M., Childs, D., & Ozgul, A. (2024). Code from "Population dynamic consequences of context-dependent tradeoffs across life histories". The American Naturalist. [Data set]. Zenodo. https://doi.org/10.5281/zenodo.10656685 
 
 
 ## DATA & FILE OVERVIEW
